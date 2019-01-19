@@ -6,66 +6,130 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
 using ModbusTCP;
+using Ini;
+using System.IO;
 
 namespace Modbus
 {
-	public class frmStart : System.Windows.Forms.Form
-	{
-		private ModbusTCP.Master	MBmaster;
-		private TextBox				txtData;
-		private Label				labData;
-		private byte[]				data;
+    public class frmStart : System.Windows.Forms.Form
+    {
+        private ModbusTCP.Master MBmaster;
+        private TextBox txtData;
+        private Label labData;
+        private byte[] data;
 
-		private System.Windows.Forms.GroupBox grpData;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Button btnConnect;
-		private System.Windows.Forms.TextBox txtIP;
-		private System.Windows.Forms.Button btnReadDisInp;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.TextBox txtSize;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox txtStartAdress;
-		private System.Windows.Forms.Button btnReadCoils;
-		private System.Windows.Forms.GroupBox grpStart;
-		private System.Windows.Forms.GroupBox grpExchange;
-		private System.Windows.Forms.Button btnReadHoldReg;
-		private System.Windows.Forms.Button btnReadInpReg;
-		private System.Windows.Forms.Button btnWriteSingleCoil;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.RadioButton radBits;
-		private System.Windows.Forms.RadioButton radBytes;
-		private System.Windows.Forms.RadioButton radWord;
-		private System.Windows.Forms.Button btnWriteSingleReg;
-		private System.Windows.Forms.Button btnWriteMultipleCoils;
+        private System.Windows.Forms.GroupBox grpData;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnConnect;
+        private System.Windows.Forms.TextBox txtIP;
+        private System.Windows.Forms.Button btnReadDisInp;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox txtSize;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtStartAdress;
+        private System.Windows.Forms.Button btnReadCoils;
+        private System.Windows.Forms.GroupBox grpStart;
+        private System.Windows.Forms.GroupBox grpExchange;
+        private System.Windows.Forms.Button btnReadHoldReg;
+        private System.Windows.Forms.Button btnReadInpReg;
+        private System.Windows.Forms.Button btnWriteSingleCoil;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RadioButton radBits;
+        private System.Windows.Forms.RadioButton radBytes;
+        private System.Windows.Forms.RadioButton radWord;
+        private System.Windows.Forms.Button btnWriteSingleReg;
+        private System.Windows.Forms.Button btnWriteMultipleCoils;
         private System.Windows.Forms.Button btnWriteMultipleReg;
         private Label label4;
         private TextBox txtUnit;
-		private System.ComponentModel.IContainer components;
+        private System.ComponentModel.IContainer components;
 
-		public frmStart()
-		{
-			InitializeComponent();
-		}
+        //Steven
+        private IniFile m_ini = new IniFile(EXEFILEPATH);
+        private TextBox txtConnStatus;
+        static private readonly string EXEFILEPATH = AppDomain.CurrentDomain.BaseDirectory + "Config.ini";
+        private void ReadConfigFromFile()
+        {
+            //ÆÄÀÏÀÌ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+            // See if this file exists in the same directory.
+            if (File.Exists(EXEFILEPATH) == true)//ÆÄÀÏÀÌ Á¸Àç
+            {
+                //MessageBox.Show(filePath + " ÆÄÀÏÀÌ Á¸ÀçÇÕ´Ï´Ù(Config.ini)");
 
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if (components != null) 
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+                string ipaddr = m_ini.IniReadValue("server_info", "ipaddr");
+                string size = m_ini.IniReadValue("data_exhange", "size");
+                string bits = m_ini.IniReadValue("show_as", "type");
 
-		#region Vom Windows Form-Designer generierter Code
-		/// <summary>
-		/// Erforderliche Methode für die Designerunterstützung. 
-		/// Der Inhalt der Methode darf nicht mit dem Code-Editor geändert werden.
-		/// </summary>
-		private void InitializeComponent()
-		{
+
+                txtIP.Text = ipaddr;
+                txtSize.Text = size;
+
+                int nCheck = 0;
+                try
+                {
+                    nCheck = int.Parse(bits);
+                }
+                catch(Exception e)
+                {
+
+                }
+                switch (nCheck)
+                {
+                    case 1:
+                        radBits.Checked = true;
+                        break;
+                    case 2:
+                        radBytes.Checked = true;
+                        break;
+                    case 3:
+                        radWord.Checked = true;
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine(EXEFILEPATH + " ÆÄÀÏÀ» Ã£À»¼ö¾ø½À´Ï´Ù(Config.ini)");
+            }
+        }
+        //private void WriteConfigToFile()
+        //{
+        //    m_ini.IniWriteValue("server_info", "ipaddr", txtIP.Text);
+        //    m_ini.IniWriteValue("data_exhange", "size", txtSize.Text);
+
+        //    int nCheck = 0;
+        //    if (radBits.Checked)
+        //        nCheck = 1;
+        //    if (radBytes.Checked)
+        //        nCheck = 2;
+        //    if (radWord.Checked)
+        //        nCheck = 3;
+        //    m_ini.IniWriteValue("show_as", "type", nCheck.ToString());
+        //}
+
+        public frmStart()
+        {
+            InitializeComponent();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Vom Windows Form-Designer generierter Code
+        /// <summary>
+        /// Erforderliche Methode f? die Designerunterst?zung. 
+        /// Der Inhalt der Methode darf nicht mit dem Code-Editor ge?dert werden.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.grpData = new System.Windows.Forms.GroupBox();
             this.grpStart = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -90,6 +154,7 @@ namespace Modbus
             this.label2 = new System.Windows.Forms.Label();
             this.txtStartAdress = new System.Windows.Forms.TextBox();
             this.btnReadCoils = new System.Windows.Forms.Button();
+            this.txtConnStatus = new System.Windows.Forms.TextBox();
             this.grpStart.SuspendLayout();
             this.grpExchange.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -100,9 +165,9 @@ namespace Modbus
             this.grpData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.grpData.Location = new System.Drawing.Point(8, 230);
+            this.grpData.Location = new System.Drawing.Point(8, 215);
             this.grpData.Name = "grpData";
-            this.grpData.Size = new System.Drawing.Size(825, 234);
+            this.grpData.Size = new System.Drawing.Size(825, 249);
             this.grpData.TabIndex = 9;
             this.grpData.TabStop = false;
             this.grpData.Text = "Data";
@@ -112,38 +177,39 @@ namespace Modbus
             // 
             this.grpStart.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.grpStart.Controls.Add(this.txtConnStatus);
             this.grpStart.Controls.Add(this.label1);
             this.grpStart.Controls.Add(this.btnConnect);
             this.grpStart.Controls.Add(this.txtIP);
-            this.grpStart.Location = new System.Drawing.Point(8, 8);
+            this.grpStart.Location = new System.Drawing.Point(8, 7);
             this.grpStart.Name = "grpStart";
-            this.grpStart.Size = new System.Drawing.Size(825, 64);
+            this.grpStart.Size = new System.Drawing.Size(825, 60);
             this.grpStart.TabIndex = 11;
             this.grpStart.TabStop = false;
             this.grpStart.Text = "Start communication";
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(16, 32);
+            this.label1.Location = new System.Drawing.Point(16, 30);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(88, 16);
+            this.label1.Size = new System.Drawing.Size(88, 15);
             this.label1.TabIndex = 7;
             this.label1.Text = "IP Address";
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(224, 24);
+            this.btnConnect.Location = new System.Drawing.Point(224, 22);
             this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(104, 33);
+            this.btnConnect.Size = new System.Drawing.Size(104, 31);
             this.btnConnect.TabIndex = 6;
             this.btnConnect.Text = "Connect";
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
             // txtIP
             // 
-            this.txtIP.Location = new System.Drawing.Point(112, 29);
+            this.txtIP.Location = new System.Drawing.Point(112, 27);
             this.txtIP.Name = "txtIP";
-            this.txtIP.Size = new System.Drawing.Size(104, 22);
+            this.txtIP.Size = new System.Drawing.Size(104, 21);
             this.txtIP.TabIndex = 5;
             this.txtIP.Text = "192.168.100.1";
             this.txtIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -167,9 +233,9 @@ namespace Modbus
             this.grpExchange.Controls.Add(this.label2);
             this.grpExchange.Controls.Add(this.txtStartAdress);
             this.grpExchange.Controls.Add(this.btnReadCoils);
-            this.grpExchange.Location = new System.Drawing.Point(8, 80);
+            this.grpExchange.Location = new System.Drawing.Point(8, 75);
             this.grpExchange.Name = "grpExchange";
-            this.grpExchange.Size = new System.Drawing.Size(825, 144);
+            this.grpExchange.Size = new System.Drawing.Size(825, 134);
             this.grpExchange.TabIndex = 12;
             this.grpExchange.TabStop = false;
             this.grpExchange.Text = "Data exhange";
@@ -177,44 +243,44 @@ namespace Modbus
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(16, 31);
+            this.label4.Location = new System.Drawing.Point(16, 29);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(88, 16);
+            this.label4.Size = new System.Drawing.Size(88, 15);
             this.label4.TabIndex = 25;
             this.label4.Text = "Unit";
             // 
             // txtUnit
             // 
-            this.txtUnit.Location = new System.Drawing.Point(104, 29);
+            this.txtUnit.Location = new System.Drawing.Point(104, 27);
             this.txtUnit.Name = "txtUnit";
-            this.txtUnit.Size = new System.Drawing.Size(60, 22);
+            this.txtUnit.Size = new System.Drawing.Size(60, 21);
             this.txtUnit.TabIndex = 24;
             this.txtUnit.Text = "0";
             this.txtUnit.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // btnWriteMultipleReg
             // 
-            this.btnWriteMultipleReg.Location = new System.Drawing.Point(688, 88);
+            this.btnWriteMultipleReg.Location = new System.Drawing.Point(688, 82);
             this.btnWriteMultipleReg.Name = "btnWriteMultipleReg";
-            this.btnWriteMultipleReg.Size = new System.Drawing.Size(104, 50);
+            this.btnWriteMultipleReg.Size = new System.Drawing.Size(104, 47);
             this.btnWriteMultipleReg.TabIndex = 23;
             this.btnWriteMultipleReg.Text = "Write multiple register";
             this.btnWriteMultipleReg.Click += new System.EventHandler(this.btnWriteMultipleReg_Click);
             // 
             // btnWriteMultipleCoils
             // 
-            this.btnWriteMultipleCoils.Location = new System.Drawing.Point(688, 32);
+            this.btnWriteMultipleCoils.Location = new System.Drawing.Point(688, 30);
             this.btnWriteMultipleCoils.Name = "btnWriteMultipleCoils";
-            this.btnWriteMultipleCoils.Size = new System.Drawing.Size(104, 49);
+            this.btnWriteMultipleCoils.Size = new System.Drawing.Size(104, 46);
             this.btnWriteMultipleCoils.TabIndex = 22;
             this.btnWriteMultipleCoils.Text = "Write multiple coils";
             this.btnWriteMultipleCoils.Click += new System.EventHandler(this.btnWriteMultipleCoils_Click);
             // 
             // btnWriteSingleReg
             // 
-            this.btnWriteSingleReg.Location = new System.Drawing.Point(568, 88);
+            this.btnWriteSingleReg.Location = new System.Drawing.Point(568, 82);
             this.btnWriteSingleReg.Name = "btnWriteSingleReg";
-            this.btnWriteSingleReg.Size = new System.Drawing.Size(104, 50);
+            this.btnWriteSingleReg.Size = new System.Drawing.Size(104, 47);
             this.btnWriteSingleReg.TabIndex = 21;
             this.btnWriteSingleReg.Text = "Write single register";
             this.btnWriteSingleReg.Click += new System.EventHandler(this.btnWriteSingleReg_Click);
@@ -224,123 +290,133 @@ namespace Modbus
             this.groupBox1.Controls.Add(this.radWord);
             this.groupBox1.Controls.Add(this.radBytes);
             this.groupBox1.Controls.Add(this.radBits);
-            this.groupBox1.Location = new System.Drawing.Point(192, 24);
+            this.groupBox1.Location = new System.Drawing.Point(192, 22);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(104, 104);
+            this.groupBox1.Size = new System.Drawing.Size(104, 97);
             this.groupBox1.TabIndex = 20;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Show as";
             // 
             // radWord
             // 
-            this.radWord.Location = new System.Drawing.Point(16, 72);
+            this.radWord.Location = new System.Drawing.Point(16, 67);
             this.radWord.Name = "radWord";
-            this.radWord.Size = new System.Drawing.Size(80, 24);
+            this.radWord.Size = new System.Drawing.Size(80, 23);
             this.radWord.TabIndex = 2;
             this.radWord.Text = "Word";
             this.radWord.CheckedChanged += new System.EventHandler(this.ShowAs);
             // 
             // radBytes
             // 
-            this.radBytes.Location = new System.Drawing.Point(16, 48);
+            this.radBytes.Location = new System.Drawing.Point(16, 45);
             this.radBytes.Name = "radBytes";
-            this.radBytes.Size = new System.Drawing.Size(80, 24);
+            this.radBytes.Size = new System.Drawing.Size(80, 22);
             this.radBytes.TabIndex = 1;
             this.radBytes.Text = "Bytes";
             this.radBytes.CheckedChanged += new System.EventHandler(this.ShowAs);
             // 
             // radBits
             // 
-            this.radBits.Location = new System.Drawing.Point(16, 24);
+            this.radBits.Location = new System.Drawing.Point(16, 22);
             this.radBits.Name = "radBits";
-            this.radBits.Size = new System.Drawing.Size(80, 24);
+            this.radBits.Size = new System.Drawing.Size(80, 23);
             this.radBits.TabIndex = 0;
             this.radBits.Text = "Bits";
             this.radBits.CheckedChanged += new System.EventHandler(this.ShowAs);
             // 
             // btnWriteSingleCoil
             // 
-            this.btnWriteSingleCoil.Location = new System.Drawing.Point(568, 32);
+            this.btnWriteSingleCoil.Location = new System.Drawing.Point(568, 30);
             this.btnWriteSingleCoil.Name = "btnWriteSingleCoil";
-            this.btnWriteSingleCoil.Size = new System.Drawing.Size(104, 49);
+            this.btnWriteSingleCoil.Size = new System.Drawing.Size(104, 46);
             this.btnWriteSingleCoil.TabIndex = 19;
             this.btnWriteSingleCoil.Text = "Write single coil";
             this.btnWriteSingleCoil.Click += new System.EventHandler(this.btnWriteSingleCoil_Click);
             // 
             // btnReadInpReg
             // 
-            this.btnReadInpReg.Location = new System.Drawing.Point(448, 88);
+            this.btnReadInpReg.Location = new System.Drawing.Point(448, 82);
             this.btnReadInpReg.Name = "btnReadInpReg";
-            this.btnReadInpReg.Size = new System.Drawing.Size(104, 50);
+            this.btnReadInpReg.Size = new System.Drawing.Size(104, 47);
             this.btnReadInpReg.TabIndex = 18;
             this.btnReadInpReg.Text = "Read input register";
             this.btnReadInpReg.Click += new System.EventHandler(this.btnReadInpReg_Click);
             // 
             // btnReadHoldReg
             // 
-            this.btnReadHoldReg.Location = new System.Drawing.Point(448, 32);
+            this.btnReadHoldReg.Location = new System.Drawing.Point(448, 30);
             this.btnReadHoldReg.Name = "btnReadHoldReg";
-            this.btnReadHoldReg.Size = new System.Drawing.Size(104, 49);
+            this.btnReadHoldReg.Size = new System.Drawing.Size(104, 46);
             this.btnReadHoldReg.TabIndex = 17;
             this.btnReadHoldReg.Text = "Read holding register";
             this.btnReadHoldReg.Click += new System.EventHandler(this.btnReadHoldReg_Click);
             // 
             // btnReadDisInp
             // 
-            this.btnReadDisInp.Location = new System.Drawing.Point(328, 88);
+            this.btnReadDisInp.Location = new System.Drawing.Point(328, 82);
             this.btnReadDisInp.Name = "btnReadDisInp";
-            this.btnReadDisInp.Size = new System.Drawing.Size(104, 50);
+            this.btnReadDisInp.Size = new System.Drawing.Size(104, 47);
             this.btnReadDisInp.TabIndex = 16;
             this.btnReadDisInp.Text = "Read discrete inputs";
             this.btnReadDisInp.Click += new System.EventHandler(this.btnReadDisInp_Click);
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(16, 90);
+            this.label3.Location = new System.Drawing.Point(16, 84);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(88, 16);
+            this.label3.Size = new System.Drawing.Size(88, 15);
             this.label3.TabIndex = 15;
             this.label3.Text = "Size";
             // 
             // txtSize
             // 
-            this.txtSize.Location = new System.Drawing.Point(104, 90);
+            this.txtSize.Location = new System.Drawing.Point(104, 84);
             this.txtSize.Name = "txtSize";
-            this.txtSize.Size = new System.Drawing.Size(60, 22);
+            this.txtSize.Size = new System.Drawing.Size(60, 21);
             this.txtSize.TabIndex = 14;
             this.txtSize.Text = "100";
             this.txtSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(16, 61);
+            this.label2.Location = new System.Drawing.Point(16, 57);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(88, 16);
+            this.label2.Size = new System.Drawing.Size(88, 15);
             this.label2.TabIndex = 13;
             this.label2.Text = "Start Adress";
             // 
             // txtStartAdress
             // 
-            this.txtStartAdress.Location = new System.Drawing.Point(104, 59);
+            this.txtStartAdress.Location = new System.Drawing.Point(104, 55);
             this.txtStartAdress.Name = "txtStartAdress";
-            this.txtStartAdress.Size = new System.Drawing.Size(60, 22);
+            this.txtStartAdress.Size = new System.Drawing.Size(60, 21);
             this.txtStartAdress.TabIndex = 12;
             this.txtStartAdress.Text = "0";
             this.txtStartAdress.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // btnReadCoils
             // 
-            this.btnReadCoils.Location = new System.Drawing.Point(328, 32);
+            this.btnReadCoils.Location = new System.Drawing.Point(328, 30);
             this.btnReadCoils.Name = "btnReadCoils";
-            this.btnReadCoils.Size = new System.Drawing.Size(104, 49);
+            this.btnReadCoils.Size = new System.Drawing.Size(104, 46);
             this.btnReadCoils.TabIndex = 11;
             this.btnReadCoils.Text = "Read coils";
             this.btnReadCoils.CursorChanged += new System.EventHandler(this.btnReadCoils_Click);
             this.btnReadCoils.Click += new System.EventHandler(this.btnReadCoils_Click);
             // 
+            // txtConnStatus
+            // 
+            this.txtConnStatus.Location = new System.Drawing.Point(334, 27);
+            this.txtConnStatus.Name = "txtConnStatus";
+            this.txtConnStatus.ReadOnly = true;
+            this.txtConnStatus.Size = new System.Drawing.Size(98, 21);
+            this.txtConnStatus.TabIndex = 26;
+            this.txtConnStatus.Text = "DisConnected";
+            this.txtConnStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // frmStart
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 15);
+            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
             this.ClientSize = new System.Drawing.Size(841, 471);
             this.Controls.Add(this.grpExchange);
             this.Controls.Add(this.grpStart);
@@ -357,181 +433,252 @@ namespace Modbus
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
-		}
-		#endregion
+        }
+        #endregion
 
-		/// <summary>
-		/// Der Haupteinstiegspunkt für die Anwendung.
-		/// </summary>
-		[STAThread]
-		static void Main() 
-		{
-			Application.Run(new frmStart());
-		}
+        /// <summary>
+        /// Der Haupteinstiegspunkt f? die Anwendung.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            Application.Run(new frmStart());
+        }
 
 
-		// ------------------------------------------------------------------------
-		// Programm start
-		// ------------------------------------------------------------------------
-		private void frmStart_Load(object sender, System.EventArgs e)
-		{
-			// Set standard format byte, make some textboxes
-			radBytes.Checked = true;
-			data = new byte[0];
-			ResizeData();
-		}
+        // ------------------------------------------------------------------------
+        // Programm start
+        // ------------------------------------------------------------------------
+        private void frmStart_Load(object sender, System.EventArgs e)
+        {
+            grpExchange.Visible = true;
+            grpData.Visible = true;
 
-		// ------------------------------------------------------------------------
-		// Programm stop
-		// ------------------------------------------------------------------------
-		private void frmStart_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if(MBmaster != null) 
-			{
-				MBmaster.Dispose();
-				MBmaster = null;
-			}	
-			Application.Exit();
-		}
-		
-		// ------------------------------------------------------------------------
-		// Button connect
-		// ------------------------------------------------------------------------
-		private void btnConnect_Click(object sender, System.EventArgs e)
-		{
-			try
-			{
-				// Create new modbus master and add event functions
-				MBmaster = new Master(txtIP.Text, 502, true);
-				MBmaster.OnResponseData += new ModbusTCP.Master.ResponseData(MBmaster_OnResponseData);
-				MBmaster.OnException	+= new ModbusTCP.Master.ExceptionData(MBmaster_OnException);
-				// Show additional fields, enable watchdog
-				grpExchange.Visible		= true;
-				grpData.Visible			= true;	
-			}
-			catch(SystemException error)
-			{
-				MessageBox.Show(error.Message);
-			}
-		}
+            data = new byte[0];
 
-		// ------------------------------------------------------------------------
-		// Button read coils
-		// ------------------------------------------------------------------------
-		private void btnReadCoils_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 1;
-            byte unit           = Convert.ToByte(txtUnit.Text);
+#if true
+            ReadConfigFromFile();
+#else
+            radBytes.Checked = true;
+#endif
+            // Set standard format byte, make some textboxes
+            ResizeData();
+
+            //ÀçÁ¢¼Ó Å¸ÀÌ¸Ó
+            var timer = new System.Timers.Timer();
+            timer.Interval = 5000;
+            timer.Start();
+            timer.Elapsed += (_sender, _args) =>
+            {
+                timer.Stop();
+                if (MBmaster != null && MBmaster.connected == true)
+                    SetText("Connected");
+                else
+                {
+                    SetText("Disconnected");
+                    Connect();
+                }
+                timer.Start();
+            };
+
+            //Read Input Å¸ÀÌ¸Ó
+            var timerReadInput = new System.Timers.Timer();
+            timerReadInput.Interval = 1000;
+            timerReadInput.Start();
+            timerReadInput.Elapsed += (_sender, _args) =>
+            {
+                ReadDisInp();
+            };
+
+
+               
+        }
+        #region updates conn status
+        private void SetText(string text)
+        {
+            this.Invoke(new MethodInvoker(
+                delegate ()
+                 {
+                     this.txtConnStatus.Text = text;
+                 }
+                 )
+                );
+        }
+        #endregion
+
+        // ------------------------------------------------------------------------
+        // Programm stop
+        // ------------------------------------------------------------------------
+        private void frmStart_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (MBmaster != null)
+            {
+                MBmaster.Dispose();
+                MBmaster = null;
+            }
+            Application.Exit();
+        }
+
+        // ------------------------------------------------------------------------
+        // Button connect
+        // ------------------------------------------------------------------------
+        private void btnConnect_Click(object sender, System.EventArgs e)
+        {
+            Connect();
+        }
+
+        private void Connect()
+        {
+            try
+            {
+                // Create new modbus master and add event functions
+                MBmaster = new Master(txtIP.Text, 502, true);
+                MBmaster.OnResponseData += new ModbusTCP.Master.ResponseData(MBmaster_OnResponseData);
+                MBmaster.OnException += new ModbusTCP.Master.ExceptionData(MBmaster_OnException);
+
+                //// Show additional fields, enable watchdog
+                //grpExchange.Visible = true;
+                //grpData.Visible = true;
+            }
+            catch (SystemException error)
+            {
+                MessageBox.Show(error.Message);
+            }
+        }
+
+
+        // ------------------------------------------------------------------------
+        // Button read coils
+        // ------------------------------------------------------------------------
+        private void btnReadCoils_Click(object sender, System.EventArgs e)
+        {
+            ushort ID = 1;
+            byte unit = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
             UInt16 Length = Convert.ToUInt16(txtSize.Text);
 
             MBmaster.ReadCoils(ID, unit, StartAddress, Length);
-		}
+        }
 
-		// ------------------------------------------------------------------------
-		// Button read discrete inputs
-		// ------------------------------------------------------------------------
-		private void btnReadDisInp_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 2;
-            byte unit           = Convert.ToByte(txtUnit.Text);
+        // ------------------------------------------------------------------------
+        // Button read discrete inputs
+        // ------------------------------------------------------------------------
+        private void btnReadDisInp_Click(object sender, System.EventArgs e)
+        {
+            ReadDisInp();
+        }
+
+        private void ReadDisInp()
+        {
+            ushort ID = 2;
+            byte unit = 0x00;
+            ushort StartAddress = 0;
+            UInt16 Length = 0;
+            this.Invoke(new MethodInvoker(
+              delegate ()
+              {
+                  unit = Convert.ToByte(txtUnit.Text);
+                  StartAddress = ReadStartAdr();
+                  Length = Convert.ToUInt16(txtSize.Text);
+                  if (MBmaster != null)
+                      MBmaster.ReadDiscreteInputs(ID, unit, StartAddress, Length);
+              }
+              )
+         );
+
+        }
+
+        // ------------------------------------------------------------------------
+        // Button read holding register
+        // ------------------------------------------------------------------------
+        private void btnReadHoldReg_Click(object sender, System.EventArgs e)
+        {
+            ushort ID = 3;
+            byte unit = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
             UInt16 Length = Convert.ToUInt16(txtSize.Text);
 
-			MBmaster.ReadDiscreteInputs(ID, unit, StartAddress, Length);	
-		}
+            MBmaster.ReadHoldingRegister(ID, unit, StartAddress, Length);
+        }
 
-		// ------------------------------------------------------------------------
-		// Button read holding register
-		// ------------------------------------------------------------------------
-		private void btnReadHoldReg_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 3;
-            byte unit           = Convert.ToByte(txtUnit.Text);
+        // ------------------------------------------------------------------------
+        // Button read holding register
+        // ------------------------------------------------------------------------
+        private void btnReadInpReg_Click(object sender, System.EventArgs e)
+        {
+            ushort ID = 4;
+            byte unit = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
-			UInt16 Length		= Convert.ToUInt16(txtSize.Text);
+            UInt16 Length = Convert.ToUInt16(txtSize.Text);
 
-			MBmaster.ReadHoldingRegister(ID, unit, StartAddress, Length);		
-		}
+            MBmaster.ReadInputRegister(ID, unit, StartAddress, Length);
+        }
 
-		// ------------------------------------------------------------------------
-		// Button read holding register
-		// ------------------------------------------------------------------------
-		private void btnReadInpReg_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 4;
-            byte unit           = Convert.ToByte(txtUnit.Text);
-            ushort StartAddress = ReadStartAdr();
-            UInt16 Length       = Convert.ToUInt16(txtSize.Text);
-
-			MBmaster.ReadInputRegister(ID, unit, StartAddress, Length);			
-		}
-
-		// ------------------------------------------------------------------------
-		// Button write single coil
-		// ------------------------------------------------------------------------
-		private void btnWriteSingleCoil_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 5;
-            byte unit           = Convert.ToByte(txtUnit.Text);
+        // ------------------------------------------------------------------------
+        // Button write single coil
+        // ------------------------------------------------------------------------
+        private void btnWriteSingleCoil_Click(object sender, System.EventArgs e)
+        {
+            ushort ID = 5;
+            byte unit = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
 
-			data			= GetData(1);
-			txtSize.Text	= "1";
+            data = GetData(1);
+            txtSize.Text = "1";
 
-			MBmaster.WriteSingleCoils(ID, unit, StartAddress, Convert.ToBoolean(data[0]));
-		}
+            MBmaster.WriteSingleCoils(ID, unit, StartAddress, Convert.ToBoolean(data[0]));
+        }
 
-		// ------------------------------------------------------------------------
-		// Button write multiple coils
-		// ------------------------------------------------------------------------	
-		private void btnWriteMultipleCoils_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 6;
-            byte unit           = Convert.ToByte(txtUnit.Text);
+        // ------------------------------------------------------------------------
+        // Button write multiple coils
+        // ------------------------------------------------------------------------	
+        private void btnWriteMultipleCoils_Click(object sender, System.EventArgs e)
+        {
+            ushort ID = 6;
+            byte unit = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
             UInt16 Length = Convert.ToUInt16(txtSize.Text);
 
             data = GetData(Convert.ToUInt16(txtSize.Text));
-			MBmaster.WriteMultipleCoils(ID, unit, StartAddress, Length, data);		
-		}
+            MBmaster.WriteMultipleCoils(ID, unit, StartAddress, Length, data);
+        }
 
-		// ------------------------------------------------------------------------
-		// Button write single register
-		// ------------------------------------------------------------------------
-		private void btnWriteSingleReg_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 7;
-            byte unit           = Convert.ToByte(txtUnit.Text);
+        // ------------------------------------------------------------------------
+        // Button write single register
+        // ------------------------------------------------------------------------
+        private void btnWriteSingleReg_Click(object sender, System.EventArgs e)
+        {
+            ushort ID = 7;
+            byte unit = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
 
-			if (radBits.Checked) data = GetData(16);
+            if (radBits.Checked) data = GetData(16);
             else if (radBytes.Checked) data = GetData(2);
             else data = GetData(1);
-            txtSize.Text	= "1";
-			txtData.Text	= data[0].ToString();
+            txtSize.Text = "1";
+            txtData.Text = data[0].ToString();
 
-			MBmaster.WriteSingleRegister(ID, unit, StartAddress, data);
-		}
-		
-		// ------------------------------------------------------------------------
-		// Button write multiple register
-		// ------------------------------------------------------------------------	
-		private void btnWriteMultipleReg_Click(object sender, System.EventArgs e)
-		{
-			ushort ID			= 8;
-            byte unit           = Convert.ToByte(txtUnit.Text);
+            MBmaster.WriteSingleRegister(ID, unit, StartAddress, data);
+        }
+
+        // ------------------------------------------------------------------------
+        // Button write multiple register
+        // ------------------------------------------------------------------------	
+        private void btnWriteMultipleReg_Click(object sender, System.EventArgs e)
+        {
+            ushort ID = 8;
+            byte unit = Convert.ToByte(txtUnit.Text);
             ushort StartAddress = ReadStartAdr();
 
-			data = GetData(Convert.ToByte(txtSize.Text));
-			MBmaster.WriteMultipleRegister(ID, unit, StartAddress, data);		
-		}
+            data = GetData(Convert.ToByte(txtSize.Text));
+            MBmaster.WriteMultipleRegister(ID, unit, StartAddress, data);
+        }
 
-		// ------------------------------------------------------------------------
-		// Event for response data
-		// ------------------------------------------------------------------------
-		private void MBmaster_OnResponseData(ushort ID, byte unit, byte function, byte[] values)
-		{
+        // ------------------------------------------------------------------------
+        // Event for response data
+        // ------------------------------------------------------------------------
+        private void MBmaster_OnResponseData(ushort ID, byte unit, byte function, byte[] values)
+        {
             // ------------------------------------------------------------------
             // Seperate calling threads
             if (this.InvokeRequired)
@@ -540,255 +687,255 @@ namespace Modbus
                 return;
             }
 
-			// ------------------------------------------------------------------------
-			// Identify requested data
-			switch(ID)
-			{
-				case 1:
-					grpData.Text = "Read coils";
-					data = values;
-					ShowAs(null, null);
-				break;
-				case 2:
-					grpData.Text = "Read discrete inputs";
-					data = values;
-					ShowAs(null, null);
-				break;
-				case 3:
-					grpData.Text = "Read holding register";
-					data = values;
-					ShowAs(null, null);
-				break;
-				case 4:
-					grpData.Text = "Read input register";
-					data = values;
-					ShowAs(null, null);
-				break;
-				case 5:
-					grpData.Text = "Write single coil";
-				break;
-				case 6:
-					grpData.Text = "Write multiple coils";
-				break;
-				case 7:
-					grpData.Text = "Write single register";
-				break;
-				case 8:
-					grpData.Text = "Write multiple register";
-				break;
-			}	
-		}
+            // ------------------------------------------------------------------------
+            // Identify requested data
+            switch (ID)
+            {
+                case 1:
+                    grpData.Text = "Read coils";
+                    data = values;
+                    ShowAs(null, null);
+                    break;
+                case 2:
+                    grpData.Text = "Read discrete inputs";
+                    data = values;
+                    ShowAs(null, null);
+                    break;
+                case 3:
+                    grpData.Text = "Read holding register";
+                    data = values;
+                    ShowAs(null, null);
+                    break;
+                case 4:
+                    grpData.Text = "Read input register";
+                    data = values;
+                    ShowAs(null, null);
+                    break;
+                case 5:
+                    grpData.Text = "Write single coil";
+                    break;
+                case 6:
+                    grpData.Text = "Write multiple coils";
+                    break;
+                case 7:
+                    grpData.Text = "Write single register";
+                    break;
+                case 8:
+                    grpData.Text = "Write multiple register";
+                    break;
+            }
+        }
 
-		// ------------------------------------------------------------------------
-		// Modbus TCP slave exception
-		// ------------------------------------------------------------------------
-		private void MBmaster_OnException(ushort id, byte unit, byte function, byte exception)
-		{
-			string exc = "Modbus says error: ";
-			switch(exception)
-			{
-				case Master.excIllegalFunction: exc += "Illegal function!"; break;
-				case Master.excIllegalDataAdr: exc += "Illegal data adress!"; break;
-				case Master.excIllegalDataVal: exc += "Illegal data value!"; break;
-				case Master.excSlaveDeviceFailure: exc += "Slave device failure!"; break;
-				case Master.excAck: exc += "Acknoledge!"; break;
-				case Master.excGatePathUnavailable: exc += "Gateway path unavailbale!"; break;
-				case Master.excExceptionTimeout: exc += "Slave timed out!"; break;
-				case Master.excExceptionConnectionLost: exc += "Connection is lost!"; break;
-				case Master.excExceptionNotConnected: exc += "Not connected!"; break;
-			}
+        // ------------------------------------------------------------------------
+        // Modbus TCP slave exception
+        // ------------------------------------------------------------------------
+        private void MBmaster_OnException(ushort id, byte unit, byte function, byte exception)
+        {
+            string exc = "Modbus says error: ";
+            switch (exception)
+            {
+                case Master.excIllegalFunction: exc += "Illegal function!"; break;
+                case Master.excIllegalDataAdr: exc += "Illegal data adress!"; break;
+                case Master.excIllegalDataVal: exc += "Illegal data value!"; break;
+                case Master.excSlaveDeviceFailure: exc += "Slave device failure!"; break;
+                case Master.excAck: exc += "Acknoledge!"; break;
+                case Master.excGatePathUnavailable: exc += "Gateway path unavailbale!"; break;
+                case Master.excExceptionTimeout: exc += "Slave timed out!"; break;
+                case Master.excExceptionConnectionLost: exc += "Connection is lost!"; break;
+                case Master.excExceptionNotConnected: exc += "Not connected!"; break;
+            }
 
-			MessageBox.Show(exc, "Modbus slave exception");
-		}
+            MessageBox.Show(exc, "Modbus slave exception");
+        }
 
-		// ------------------------------------------------------------------------
-		// Generate new number of text boxes
-		// ------------------------------------------------------------------------
-		private void ResizeData()
-		{
-			// Create as many textboxes as fit into window
-			grpData.Controls.Clear();
-			int x = 0;
-			int y = 10;
-			int z = 20;
-			while(y < grpData.Size.Width - 100)
-			{
-				labData				= new Label();
-				grpData.Controls.Add(labData);
-				labData.Size		= new System.Drawing.Size(30, 20);
-				labData.Location	= new System.Drawing.Point(y, z);
-				labData.Text		= Convert.ToString(x + 1);
+        // ------------------------------------------------------------------------
+        // Generate new number of text boxes
+        // ------------------------------------------------------------------------
+        private void ResizeData()
+        {
+            // Create as many textboxes as fit into window
+            grpData.Controls.Clear();
+            int x = 0;
+            int y = 10;
+            int z = 20;
+            while (y < grpData.Size.Width - 100)
+            {
+                labData = new Label();
+                grpData.Controls.Add(labData);
+                labData.Size = new System.Drawing.Size(30, 20);
+                labData.Location = new System.Drawing.Point(y, z);
+                labData.Text = Convert.ToString(x + 1);
 
-				txtData				= new TextBox();
-				grpData.Controls.Add(txtData);
-				txtData.Size		= new System.Drawing.Size(50, 20);
-				txtData.Location	= new System.Drawing.Point(y + 30, z);
-				txtData.TextAlign	= System.Windows.Forms.HorizontalAlignment.Right;
-				txtData.Tag			= x;
+                txtData = new TextBox();
+                grpData.Controls.Add(txtData);
+                txtData.Size = new System.Drawing.Size(50, 20);
+                txtData.Location = new System.Drawing.Point(y + 30, z);
+                txtData.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+                txtData.Tag = x;
 
-				x++;
-				z = z + txtData.Size.Height + 5;
-				if(z > grpData.Size.Height - 40) 
-				{
-					y = y + 100;
-					z = 20;
-				}
-			}
-		}
+                x++;
+                z = z + txtData.Size.Height + 5;
+                if (z > grpData.Size.Height - 40)
+                {
+                    y = y + 100;
+                    z = 20;
+                }
+            }
+        }
 
-		// ------------------------------------------------------------------------
-		// Resize form elements
-		// ------------------------------------------------------------------------
-		private void frmStart_Resize(object sender, System.EventArgs e)
-		{
-			if(grpData.Visible == true) ResizeData();
-		}
+        // ------------------------------------------------------------------------
+        // Resize form elements
+        // ------------------------------------------------------------------------
+        private void frmStart_Resize(object sender, System.EventArgs e)
+        {
+            if (grpData.Visible == true) ResizeData();
+        }
 
-		// ------------------------------------------------------------------------
-		// Read start address
-		// ------------------------------------------------------------------------
-		private ushort ReadStartAdr()
-		{
-			// Convert hex numbers into decimal
-			if(txtStartAdress.Text.IndexOf("0x", 0, txtStartAdress.Text.Length) == 0) 
-			{
-				string str = txtStartAdress.Text.Replace("0x", "");
-				ushort hex = Convert.ToUInt16(str, 16);
-				return hex;
-			}
-			else 
-			{
-				return Convert.ToUInt16(txtStartAdress.Text);
-			}
-		}
+        // ------------------------------------------------------------------------
+        // Read start address
+        // ------------------------------------------------------------------------
+        private ushort ReadStartAdr()
+        {
+            // Convert hex numbers into decimal
+            if (txtStartAdress.Text.IndexOf("0x", 0, txtStartAdress.Text.Length) == 0)
+            {
+                string str = txtStartAdress.Text.Replace("0x", "");
+                ushort hex = Convert.ToUInt16(str, 16);
+                return hex;
+            }
+            else
+            {
+                return Convert.ToUInt16(txtStartAdress.Text);
+            }
+        }
 
-		// ------------------------------------------------------------------------
-		// Read values from textboxes
-		// ------------------------------------------------------------------------
-		private byte[] GetData(int num)
-		{
-			bool[] bits	= new bool[num];
-			byte[] data	= new Byte[num];
-			int[]  word	= new int[num];
+        // ------------------------------------------------------------------------
+        // Read values from textboxes
+        // ------------------------------------------------------------------------
+        private byte[] GetData(int num)
+        {
+            bool[] bits = new bool[num];
+            byte[] data = new Byte[num];
+            int[] word = new int[num];
 
-			// ------------------------------------------------------------------------
-			// Convert data from text boxes
-			foreach(Control ctrl in grpData.Controls)
-			{
-				if (ctrl is TextBox)
-				{
-					int x = Convert.ToInt16(ctrl.Tag);
-					if(radBits.Checked)
-					{
-						if((x <= bits.GetUpperBound(0)) && (ctrl.Text != "")) bits[x] = Convert.ToBoolean(Convert.ToByte(ctrl.Text));
-						else break;
-					}
-					if(radBytes.Checked)
-					{
-						if((x <= data.GetUpperBound(0)) && (ctrl.Text != "")) data[x] = Convert.ToByte(ctrl.Text);
-						else break;
-					}
-					if(radWord.Checked)
-					{
+            // ------------------------------------------------------------------------
+            // Convert data from text boxes
+            foreach (Control ctrl in grpData.Controls)
+            {
+                if (ctrl is TextBox)
+                {
+                    int x = Convert.ToInt16(ctrl.Tag);
+                    if (radBits.Checked)
+                    {
+                        if ((x <= bits.GetUpperBound(0)) && (ctrl.Text != "")) bits[x] = Convert.ToBoolean(Convert.ToByte(ctrl.Text));
+                        else break;
+                    }
+                    if (radBytes.Checked)
+                    {
+                        if ((x <= data.GetUpperBound(0)) && (ctrl.Text != "")) data[x] = Convert.ToByte(ctrl.Text);
+                        else break;
+                    }
+                    if (radWord.Checked)
+                    {
                         if ((x <= data.GetUpperBound(0)) && (ctrl.Text != ""))
                         {
                             try { word[x] = Convert.ToInt16(ctrl.Text); }
-                            catch(SystemException) { word[x] = Convert.ToUInt16(ctrl.Text);};
+                            catch (SystemException) { word[x] = Convert.ToUInt16(ctrl.Text); };
                         }
                         else break;
-					}
-				}
-			}
-			if(radBits.Checked)
-			{
-				int numBytes		= (num / 8 + (num % 8 > 0 ? 1 : 0));
-				data				= new Byte[numBytes];
-				BitArray bitArray	= new BitArray(bits);
-				bitArray.CopyTo(data, 0);
-			}
-			if(radWord.Checked)
-			{
-				data = new Byte[num*2];
-				for(int x=0;x<num;x++)
-				{
-					byte[] dat = BitConverter.GetBytes((short) IPAddress.HostToNetworkOrder((short) word[x]));
-					data[x*2]	= dat[0];
-					data[x*2+1] = dat[1];
-				}
-			}
-			return data;
-		}
+                    }
+                }
+            }
+            if (radBits.Checked)
+            {
+                int numBytes = (num / 8 + (num % 8 > 0 ? 1 : 0));
+                data = new Byte[numBytes];
+                BitArray bitArray = new BitArray(bits);
+                bitArray.CopyTo(data, 0);
+            }
+            if (radWord.Checked)
+            {
+                data = new Byte[num * 2];
+                for (int x = 0; x < num; x++)
+                {
+                    byte[] dat = BitConverter.GetBytes((short)IPAddress.HostToNetworkOrder((short)word[x]));
+                    data[x * 2] = dat[0];
+                    data[x * 2 + 1] = dat[1];
+                }
+            }
+            return data;
+        }
 
-		// ------------------------------------------------------------------------
-		// Show values in selected way
-		// ------------------------------------------------------------------------
-		private void ShowAs(object sender, System.EventArgs e)
-		{
-			RadioButton rad;
-			if(sender is RadioButton)	
-			{
-				rad = (RadioButton) sender;
-				if(rad.Checked == false) return;
-			}
+        // ------------------------------------------------------------------------
+        // Show values in selected way
+        // ------------------------------------------------------------------------
+        private void ShowAs(object sender, System.EventArgs e)
+        {
+            RadioButton rad;
+            if (sender is RadioButton)
+            {
+                rad = (RadioButton)sender;
+                if (rad.Checked == false) return;
+            }
 
-			bool[]	bits = new bool[1];
-			int[]	word = new int[1];
+            bool[] bits = new bool[1];
+            int[] word = new int[1];
 
-			// Convert data to selected data type
-			if(radBits.Checked == true)
-			{
-				BitArray bitArray = new BitArray(data);
-				bits = new bool[bitArray.Count];
-				bitArray.CopyTo(bits, 0);
-			}
-			if(radWord.Checked == true)
-			{
-				if(data.Length < 2) return;
-                int length = data.Length / 2 + Convert.ToInt16(data.Length % 2 > 0);      
+            // Convert data to selected data type
+            if (radBits.Checked == true)
+            {
+                BitArray bitArray = new BitArray(data);
+                bits = new bool[bitArray.Count];
+                bitArray.CopyTo(bits, 0);
+            }
+            if (radWord.Checked == true)
+            {
+                if (data.Length < 2) return;
+                int length = data.Length / 2 + Convert.ToInt16(data.Length % 2 > 0);
                 word = new int[length];
-				for(int x=0;x<length; x=x+2)
-				{
-					word[x/2] = data[x] * 256 + data[x+1];
-				}
-			}
+                for (int x = 0; x < length; x = x + 2)
+                {
+                    word[x / 2] = data[x] * 256 + data[x + 1];
+                }
+            }
 
-			// ------------------------------------------------------------------------
-			// Put new data into text boxes
-			foreach(Control ctrl in grpData.Controls)
-			{
-				if (ctrl is TextBox)
-				{
-					int x = Convert.ToInt16(ctrl.Tag);
-					if(radBits.Checked)
-					{
-						if(x <= bits.GetUpperBound(0)) 
-						{
-							ctrl.Text = Convert.ToByte(bits[x]).ToString();
-							ctrl.Visible = true;
-						}
-						else ctrl.Text = "";
-					}
-					if(radBytes.Checked)
-					{
-						if(x <= data.GetUpperBound(0)) 
-						{
-							ctrl.Text = data[x].ToString();
-							ctrl.Visible = true;
-						}
-						else ctrl.Text = "";
-					}
-					if(radWord.Checked)
-					{
-						if(x <= word.GetUpperBound(0)) 
-						{
-							ctrl.Text = word[x].ToString();
-							ctrl.Visible = true;
-						}
-						else ctrl.Text = "";
-					}
-				}
-			}
-		}
+            // ------------------------------------------------------------------------
+            // Put new data into text boxes
+            foreach (Control ctrl in grpData.Controls)
+            {
+                if (ctrl is TextBox)
+                {
+                    int x = Convert.ToInt16(ctrl.Tag);
+                    if (radBits.Checked)
+                    {
+                        if (x <= bits.GetUpperBound(0))
+                        {
+                            ctrl.Text = Convert.ToByte(bits[x]).ToString();
+                            ctrl.Visible = true;
+                        }
+                        else ctrl.Text = "";
+                    }
+                    if (radBytes.Checked)
+                    {
+                        if (x <= data.GetUpperBound(0))
+                        {
+                            ctrl.Text = data[x].ToString();
+                            ctrl.Visible = true;
+                        }
+                        else ctrl.Text = "";
+                    }
+                    if (radWord.Checked)
+                    {
+                        if (x <= word.GetUpperBound(0))
+                        {
+                            ctrl.Text = word[x].ToString();
+                            ctrl.Visible = true;
+                        }
+                        else ctrl.Text = "";
+                    }
+                }
+            }
+        }
 
- 	}
+    }
 }

@@ -707,7 +707,17 @@ namespace ModbusTCP
         // Write asynchronous data response
         private void OnReceive(System.IAsyncResult result)
         {
-            tcpAsyCl.EndReceive(result);
+            try
+            {
+                tcpAsyCl.EndReceive(result);
+            }
+            catch(Exception e)
+            {
+                //접속중인 상태에서 서버와 연결이 끊켰을때
+                _connected = false;
+                return;
+            }
+            
             if (result.IsCompleted == false) CallException(0xFF, 0xFF, 0xFF,excExceptionConnectionLost);
 
             ushort id = SwapUInt16(BitConverter.ToUInt16(tcpAsyClBuffer, 0));
