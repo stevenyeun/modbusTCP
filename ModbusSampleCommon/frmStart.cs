@@ -8,9 +8,13 @@ using System.Data;
 using ModbusTCP;
 using Ini;
 using System.IO;
+using System.Reflection;
+using WindowsInput.Native;
+using WindowsInput;
 
 namespace Modbus
 {
+  
     public class frmStart : System.Windows.Forms.Form
     {
         private ModbusTCP.Master MBmaster;
@@ -60,6 +64,11 @@ namespace Modbus
                 string size = m_ini.IniReadValue("data_exhange", "size");
                 string bits = m_ini.IniReadValue("show_as", "type");
 
+                for( int i=0; i<8; i++)
+                {
+                    string key = m_ini.IniReadValue("virtualkey", "key"+ (i+1).ToString());
+                    m_virtualKeyCodes[i] = (VirtualKeyCode)Enum.Parse(typeof(VirtualKeyCode), key);
+                }
 
                 txtIP.Text = ipaddr;
                 txtSize.Text = size;
@@ -91,20 +100,35 @@ namespace Modbus
                 Console.WriteLine(EXEFILEPATH + " 파일을 찾을수없습니다(Config.ini)");
             }
         }
-        //private void WriteConfigToFile()
-        //{
-        //    m_ini.IniWriteValue("server_info", "ipaddr", txtIP.Text);
-        //    m_ini.IniWriteValue("data_exhange", "size", txtSize.Text);
+        private void WriteConfigToFile()
+        {
+            m_ini.IniWriteValue("server_info", "ipaddr", txtIP.Text);
+            m_ini.IniWriteValue("data_exhange", "size", txtSize.Text);
 
-        //    int nCheck = 0;
-        //    if (radBits.Checked)
-        //        nCheck = 1;
-        //    if (radBytes.Checked)
-        //        nCheck = 2;
-        //    if (radWord.Checked)
-        //        nCheck = 3;
-        //    m_ini.IniWriteValue("show_as", "type", nCheck.ToString());
-        //}
+            int nCheck = 0;
+            if (radBits.Checked)
+                nCheck = 1;
+            if (radBytes.Checked)
+                nCheck = 2;
+            if (radWord.Checked)
+                nCheck = 3;
+            m_ini.IniWriteValue("show_as", "type", nCheck.ToString());
+
+            m_ini.IniWriteValue("virtualkey", "key1", "a");
+            m_ini.IniWriteValue("virtualkey", "key2", "a");
+            m_ini.IniWriteValue("virtualkey", "key3", "a");
+            m_ini.IniWriteValue("virtualkey", "key4", "a");
+
+            m_ini.IniWriteValue("virtualkey", "key5", "a");
+            m_ini.IniWriteValue("virtualkey", "key6", "a");
+            m_ini.IniWriteValue("virtualkey", "key7", "a");
+            m_ini.IniWriteValue("virtualkey", "key8", "a");
+        }
+        private LogWriter m_logWriterBits = new LogWriter("ReadDiscreteInputs" + ".log", "StartLog");
+        private LogWriter m_logWriterEvent = new LogWriter("Event" + ".log", "StartLog");
+        private VirtualKeyCode[] m_virtualKeyCodes = new VirtualKeyCode[8];
+        InputSimulator m_inputSim = new InputSimulator();
+        //
 
         public frmStart()
         {
@@ -451,12 +475,16 @@ namespace Modbus
         // ------------------------------------------------------------------------
         private void frmStart_Load(object sender, System.EventArgs e)
         {
+            //Steven
+            this.WindowState = FormWindowState.Minimized;
+
             grpExchange.Visible = true;
             grpData.Visible = true;
 
             data = new byte[0];
 
-#if true
+#if true//Steven
+            //WriteConfigToFile();
             ReadConfigFromFile();
 #else
             radBytes.Checked = true;
@@ -542,7 +570,8 @@ namespace Modbus
             }
             catch (SystemException error)
             {
-                MessageBox.Show(error.Message);
+                //MessageBox.Show(error.Message);
+                m_logWriterEvent.LogWrite(error.Message);
             }
         }
 
@@ -745,7 +774,8 @@ namespace Modbus
                 case Master.excExceptionNotConnected: exc += "Not connected!"; break;
             }
 
-            MessageBox.Show(exc, "Modbus slave exception");
+            //MessageBox.Show(exc, "Modbus slave exception");
+            m_logWriterEvent.LogWrite(exc);
         }
 
         // ------------------------------------------------------------------------
@@ -935,7 +965,63 @@ namespace Modbus
                     }
                 }
             }
+
+            string bitstring = "";
+            if(bits.Length != 0)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    bitstring += bits[i] ? 1 : 0;
+                    bitstring += " ";
+
+                    if (bits[i] == true)
+                    {
+                        m_inputSim.Keyboard.KeyPress(m_virtualKeyCodes[i]);
+                    }
+                }
+            }
+            m_logWriterBits.LogWrite(bitstring);
         }
 
+    }
+    public class LogWriter
+    {
+        private string m_exePath = string.Empty;
+        private string m_fileName = string.Empty;
+        public LogWriter(string fileName, string logMessage)
+        {
+            m_fileName = fileName;
+            LogWrite(logMessage);
+        }
+        public void LogWrite(string logMessage)
+        {
+            m_exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            try
+            {
+                using (StreamWriter w = File.AppendText(m_exePath + "\\" + m_fileName))
+                {
+                    Log(logMessage, w);
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        public void Log(string logMessage, TextWriter txtWriter)
+        {
+            try
+            {
+                txtWriter.Write("\r\nLog Entry : ");
+                txtWriter.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),
+                    DateTime.Now.ToLongDateString());
+                txtWriter.WriteLine("  :");
+                txtWriter.WriteLine("  :{0}", logMessage);
+                txtWriter.WriteLine("-------------------------------");
+            }
+            catch (Exception ex)
+            {
+            }
+        }
     }
 }
