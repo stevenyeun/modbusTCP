@@ -66,8 +66,13 @@ namespace Modbus
 
                 for( int i=0; i<8; i++)
                 {
-                    string key = m_ini.IniReadValue("virtualkey", "key"+ (i+1).ToString());
-                    m_virtualKeyCodes[i] = (VirtualKeyCode)Enum.Parse(typeof(VirtualKeyCode), key);
+                    string key1 = m_ini.IniReadValue("virtualkey", "KeyOn"+ (i+1).ToString());
+                    if(key1 != "")
+                        m_virtualKeyCodes1[i] = (VirtualKeyCode)Enum.Parse(typeof(VirtualKeyCode), key1);
+
+                    string key2 = m_ini.IniReadValue("virtualkey", "KeyOff" + (i + 1).ToString());
+                    if (key2 != "")
+                        m_virtualKeyCodes2[i] = (VirtualKeyCode)Enum.Parse(typeof(VirtualKeyCode), key2);
                 }
 
                 txtIP.Text = ipaddr;
@@ -126,7 +131,10 @@ namespace Modbus
         }
         private LogWriter m_logWriterBits = new LogWriter("ReadDiscreteInputs" + ".log", "StartLog");
         private LogWriter m_logWriterEvent = new LogWriter("Event" + ".log", "StartLog");
-        private VirtualKeyCode[] m_virtualKeyCodes = new VirtualKeyCode[8];
+        private VirtualKeyCode[] m_virtualKeyCodes1 = new VirtualKeyCode[8];        
+        private VirtualKeyCode[] m_virtualKeyCodes2 = new VirtualKeyCode[8];
+        private bool[] m_virtualKeyUse1 = new bool[8];
+        private bool[] m_virtualKeyUse2 = new bool[8];
         InputSimulator m_inputSim = new InputSimulator();
         //
 
@@ -976,7 +984,27 @@ namespace Modbus
 
                     if (bits[i] == true)
                     {
-                        m_inputSim.Keyboard.KeyPress(m_virtualKeyCodes[i]);
+                        if (m_virtualKeyCodes1[i] != 0)
+                        {
+                            if (m_virtualKeyUse1[i] == false)
+                            {
+                                m_inputSim.Keyboard.KeyPress(m_virtualKeyCodes1[i]);
+                                m_virtualKeyUse1[i] = true;
+                                m_virtualKeyUse2[i] = false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (m_virtualKeyCodes2[i] != 0)
+                        {
+                            if (m_virtualKeyUse2[i] == false)
+                            {
+                                m_inputSim.Keyboard.KeyPress(m_virtualKeyCodes2[i]);
+                                m_virtualKeyUse2[i] = true;
+                                m_virtualKeyUse1[i] = false;
+                            }
+                        }
                     }
                 }
             }
